@@ -17,6 +17,10 @@ namespace texture {
     void loadSpriteSheetPng(SDL_Renderer* renderer, const std::string& fileName, const std::string& internSheetName);
     const Rect& getSpriteSheetBounds(const std::string& textureName);
     SDL_Texture* getSpriteSheet(const std::string& textureName);
+
+    inline void loadSpriteSheetPng(SDL_Renderer* renderer, const std::string& fileName) {
+        loadSpriteSheetPng(renderer, fileName, fileName);
+    }
 }
 
 #endif

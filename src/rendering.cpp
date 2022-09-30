@@ -19,7 +19,7 @@ void drawImage(SDL_Renderer* renderer, const std::string& textureName, const vec
     const Rect& source{ texture::getSpriteSheetBounds(textureName) };
 
     SDL_Rect from{ source.x, source.y, source.w, source.h };
-    SDL_Rect to{ position.x, position.y, source.w * scale, source.h * scale };
+    SDL_Rect to{ position.xi(), position.yi(), source.w * scale, source.h * scale };
 
     SDL_RenderCopy(renderer, texture, &from, &to);
 }

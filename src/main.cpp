@@ -5,15 +5,8 @@
 #include <string>
 
 #include "game.h"
-#include "rendering.h"
-
-#include "util/random.h"
+#include "map/maploader.h"
 #include "util/time.h"
-
-#include "data/TextureHandler.h"
-#include "data/color.h"
-#include "data/rect.h"
-#include "data/vec2f.h"
 
 const int WIDTH = 800, HEIGHT = 600;
 const std::string title = "Hello Window";

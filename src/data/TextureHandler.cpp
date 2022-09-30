@@ -36,7 +36,7 @@ namespace texture {
 				std::istringstream iss(line);
 				while (std::getline(iss, linePart, ' ')) {
 					if (splitCounter == 0) {
-						textureName = linePart;
+						textureName = internSheetName + "_" + linePart;
 					} 
 					else if (splitCounter == 1) {
 						x = std::stoi(linePart);
@@ -60,7 +60,6 @@ namespace texture {
 			
 			lineCount++;
 		}
-		std::cout << "a\n";
 	}
 
 	const Rect& getSpriteSheetBounds(const std::string& textureName) {
