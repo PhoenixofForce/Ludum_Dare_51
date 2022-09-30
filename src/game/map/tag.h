@@ -6,7 +6,6 @@
 struct Tag {
     std::string header;
     std::string body;
-
 };
 
 #endif

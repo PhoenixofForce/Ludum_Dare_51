@@ -4,8 +4,7 @@
 
 #include <string>
 
-#include "game.h"
-#include "map/maploader.h"
+#include "game/game.h"
 #include "util/time.h"
 
 const int WIDTH = 800, HEIGHT = 600;
@@ -27,7 +26,7 @@ int main(int argc, char* argv[]) {
     SDL_Renderer* renderer{SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)};
     SDL_Event event;
 
-    Game game{ renderer };
+    Game game{ renderer, WIDTH, HEIGHT };
     std::map<int, bool> pressedKeys{};
 
     while(true) {

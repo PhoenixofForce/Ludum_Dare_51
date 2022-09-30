@@ -10,8 +10,8 @@
 #include <functional>
 
 #include "tag.h"
-#include "../util/matrix.h"
-#include "../util/stringUtils.h"
+#include "../../util/structs/matrix.h"
+#include "../../util/stringUtils.h"
 
 
 using IDMapper = std::map<int, std::string>;

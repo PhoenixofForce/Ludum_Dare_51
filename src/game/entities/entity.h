@@ -1,8 +1,8 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-#include "data/vec2f.h"
-#include "data/sprite.h"
+#include "../../util/structs/vec2f.h"
+#include "../../assets/sprite.h"
 
 struct Entity {
     vec::vec2f position;

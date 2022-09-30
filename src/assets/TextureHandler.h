@@ -10,7 +10,7 @@
 #include <sstream>
 #include <fstream>
 
-#include "rect.h"
+#include "../util/structs/structs.h"
 
 namespace texture {
     void loadImagePng(SDL_Renderer* renderer, const std::string& fileName, const std::string& internTextureName);
