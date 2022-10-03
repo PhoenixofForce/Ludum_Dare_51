@@ -32,7 +32,8 @@ public:
 
 private: 
     SDL_Renderer* renderer;
-    Mix_Music* music;
+    Mix_Chunk* music;
+    Mix_Music* backgroundNoise;
 
     int state = 1; //0 - cut, 1 - stats
     int curtainPos = 0;

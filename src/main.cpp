@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
     }
 
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024);
-    Mix_VolumeMusic(128);
+    Mix_VolumeMusic(45);
 
     SDL_Renderer* renderer{SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)};
     SDL_Event event;

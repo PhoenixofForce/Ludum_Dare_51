@@ -17,8 +17,12 @@ std::vector<Request> requests {
 };
 
 Game::Game(SDL_Renderer* renderer, int windowWidth, int windowHeight) 
-: renderer{renderer}, music{Mix_LoadMUS("res/cutter.wav")}, window_width{windowWidth}, window_height{windowHeight}, map{renderer, window_width, window_height, ""}
+: renderer{renderer}, music{Mix_LoadWAV("res/cutter.wav")}, backgroundNoise{Mix_LoadMUS("res/backgroundNoise.wav")},
+ window_width{windowWidth}, window_height{windowHeight}, map{renderer, window_width, window_height, ""}
 {  
+
+    Mix_PlayMusic(backgroundNoise, -1);
+
     std::shuffle(requests.begin(), requests.end(), std::default_random_engine{});
     std::shuffle(maps.begin(), maps.end(), std::default_random_engine{});
 
@@ -51,12 +55,12 @@ void Game::update(long dt, std::map<int, bool> pressedKeys) {
 
             if(!playingMusic) {
                 playingMusic = true;
-                Mix_PlayMusic(music, -1);
+                Mix_PlayChannel(0, music, -1);
             }
         } else {
             if(playingMusic) {
                 playingMusic = false;
-                Mix_PauseMusic();
+                Mix_Pause(0);
             }
         }
     }
@@ -66,7 +70,7 @@ void Game::update(long dt, std::map<int, bool> pressedKeys) {
 
         if(playingMusic) {
             playingMusic = false;
-            Mix_PauseMusic();
+            Mix_Pause(0);
         }
 
         if(timeRunning > PAUSE_TIME && timeRunning <= TRANS_TIME + PAUSE_TIME) {
@@ -96,6 +100,8 @@ void Game::update(long dt, std::map<int, bool> pressedKeys) {
 
                     score = std::round(balancedAccuracy * 5.0);
                     score = std::min(5, score);
+
+                    if(hairInside == 0) score = 0;
                 }
 
                 std::cout << std::endl << "SCORE: " << score << std::endl << std::endl;
