@@ -1,6 +1,8 @@
 #include <iostream>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
+#include <windows.h>
+
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
 
@@ -13,6 +15,7 @@ const int WIDTH = 1080, HEIGHT = 720;
 const std::string title = "Speed Barber";
 
 int main(int argc, char* argv[]) {
+    ShowWindow(GetConsoleWindow(), SW_HIDE);
     std::cout.precision(17);
 
     SDL_Init(SDL_INIT_EVERYTHING);
