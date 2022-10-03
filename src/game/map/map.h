@@ -13,16 +13,19 @@
 class GameMap {
 
 public:
-    GameMap(SDL_Renderer* renderer, int scale, const std::string& name);
+    GameMap(SDL_Renderer* renderer, int windowWidth, int windowHeight, int scale, const std::string& name);
 
     void update(long dt, std::map<int, bool> pressedKeys);
     void render(SDL_Renderer* renderer, vec::vec2f cameraPosition = vec::vec2f{});
 
     std::vector<Entity>& getEntities();
+    const std::string& getSheetName();
 
 private:
-    int tileSize;
-    int scale;
+    int tileSize{1};
+    int scale{1};
+    int windowWidth{0};
+    int windowHeight{0};
 
     std::string textureSheet{};
 

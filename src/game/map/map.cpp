@@ -1,10 +1,10 @@
 #include "map.h"
 
-GameMap::GameMap(SDL_Renderer* renderer, int scale, const std::string& name) 
-: scale(scale)
+GameMap::GameMap(SDL_Renderer* renderer, int inWindowWidth, int inWindowHeight, int inScale, const std::string& name) 
+: scale(inScale), windowWidth(inWindowWidth), windowHeight(inWindowHeight)
 {
 
-    if(name.length() > 0) loadMap(name, 
+    if(name.length() > 0) loadMap("res/" + name + ".map", 
         [this, renderer](int tileSize, std::vector<Tag> tags) { 
             this->tileSize = tileSize;
             for(const Tag& tag: tags) {
@@ -45,21 +45,25 @@ void GameMap::render(SDL_Renderer* renderer, vec::vec2f cameraPosition) {
     }
 }
 
-void GameMap::addGameObject(IDMapper idMaps, float depth, int texture, float x, float y) {
-    int hairCount = (texture::getTextureCount() - 2)  / 2; //-1(face) -1 (anchor) / 2 (hair / outline)  
-    int hairID = rnd::random(0, hairCount) + 1;
+const std::string& GameMap::getSheetName() {
+    return textureSheet;
+}
 
-    vec::vec2f pos{ x * scale, y * scale };
+void GameMap::addGameObject(IDMapper idMaps, float depth, int texture, float x, float y) {
     std::string textures[1]{ 
         idMaps[texture]
      };
 
-    bool isHair = false;
-    if(textures[0].find("anchor") != std::string::npos) {
-        isHair = true;
+    vec::vec2f pos{ x * scale, y * scale };
+
+    //Get Random Hair texture
+    bool isHair = (textures[0].find("anchor") != std::string::npos);
+    if(isHair) {
+        int hairCount = texture::getTextureCount("hair") / 2;
+        int hairID = rnd::random(0, hairCount) + 1;
+
         textures[0] = textureSheet + "_hair_" + std::to_string(hairID);
     }
-    //std::cout << textures[0] << std::endl;
 
     Rect bounds{pos.x, pos.y, 0, 0};
     bounds.w = texture::getSpriteSheetBounds(textures[0]).w * scale;
@@ -67,7 +71,23 @@ void GameMap::addGameObject(IDMapper idMaps, float depth, int texture, float x, 
     
     if(isHair) pos.x -= bounds.w / 2; 
 
+    //Center Everything
+    static int entityID = 0;
+    static vec::vec2f offsetToMiddle{};
+    if(entityID == 0) {
+        entityID++;
+        offsetToMiddle = vec::vec2f{windowWidth, windowHeight} / 2 - vec::vec2f{bounds.w, bounds.h} / 2 - pos;
+    }
+    pos += offsetToMiddle;
+    bounds.x += offsetToMiddle.x;
+    bounds.y += offsetToMiddle.y;
+
     Sprite sprite{100, textures};
+    if(!isHair) {
+        textures[0] = textureSheet + "_face";
+        sprite = Sprite{100, textures[0], texture::getTextureCount(textures[0])};
+    }
+
     entities.push_back({ pos, sprite, bounds });
 }
 

@@ -1,5 +1,7 @@
 #include "sprite.h"
 
+#include <iostream>
+
 Sprite::Sprite(int time, const std::string& spriteName, int count) {
     this->time = time;
     for(int i = 0; i < count; i++) {

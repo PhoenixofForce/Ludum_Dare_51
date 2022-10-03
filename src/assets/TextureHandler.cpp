@@ -15,6 +15,7 @@ namespace texture {
 	}
 
 	void loadSpriteSheetPng(SDL_Renderer* renderer, const std::string& fileName, const std::string& internSheetName) {
+		std::cout << "loading " << fileName << std::endl;
 		loadImagePng(renderer, fileName, internSheetName);
 
 		std::ifstream f{};
@@ -84,7 +85,25 @@ namespace texture {
 		imageSheets.clear();
 	}
 
-	int getTextureCount() {
-		return imageSheets.size();
+	void deleteSheet(const std::string& sheetName) {
+		std::cout << "unloading " << sheetName << std::endl;
+
+		SDL_DestroyTexture(textureImages[sheetName]);
+		textureImages.erase(sheetName);
+
+		for(std::map<std::string, std::string>::iterator iter = imageSheets.begin(); iter != imageSheets.end(); ++iter) {
+			if(iter->second == sheetName) {
+				imageSheets.erase(iter->first);
+				imageRects.erase(iter->first);
+			}	
+		}
+	}
+
+	int getTextureCount(const std::string& substring) {
+		int out = 0;
+		for(std::map<std::string, std::string>::iterator iter = imageSheets.begin(); iter != imageSheets.end(); ++iter) {
+			if(iter->first.find(substring) != std::string::npos) out++;
+		}
+		return out;
 	}
 }

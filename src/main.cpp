@@ -7,7 +7,7 @@
 #include "game/game.h"
 #include "util/time.h"
 
-const int WIDTH = 800, HEIGHT = 600;
+const int WIDTH = 1080, HEIGHT = 720;
 const std::string title = "Hello Window";
 
 int main(int argc, char* argv[]) {

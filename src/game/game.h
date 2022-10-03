@@ -28,12 +28,20 @@ public:
     void setMouse(const int& mouseX, const int& mouseY);
 
 private: 
+    SDL_Renderer* renderer;
+
+    int state = 0; //0 - cut, 1 - stats
+    int curtainPos = 0;
+
+    long timeRunning = 1;
     int scale = 5;
     int window_width = 0;
     int window_height = 0;
 
     GameMap map;
     vec::vec2f position{144, 4};
+
+    void cutHair();
 };
 
 #endif

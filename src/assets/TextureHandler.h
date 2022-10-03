@@ -19,7 +19,8 @@ namespace texture {
     SDL_Texture* getSpriteSheet(const std::string& textureName);
 
     void deleteAll();
-    int getTextureCount();
+    void deleteSheet(const std::string& sheetName);
+    int getTextureCount(const std::string& substring = "");
 
     inline void loadSpriteSheetPng(SDL_Renderer* renderer, const std::string& fileName) {
         loadSpriteSheetPng(renderer, fileName, fileName);
