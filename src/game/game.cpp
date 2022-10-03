@@ -4,7 +4,7 @@
 #define TRANS_TIME 200
 #define PAUSE_TIME 500
 
-std::vector<std::string> maps{"imgTest", "testMap"};
+std::vector<std::string> maps{"level_1", "level_2", "level_3", "level_4", "level_5"};
 std::vector<Request> requests {
   {"goat", std::vector<Rect>{{462, 508, 162, 183}}},
   {"u", std::vector<Rect>{{397, 352, 62, 124}, {623, 343, 62, 141}, {462, 508, 162, 75}}},
@@ -20,6 +20,8 @@ Game::Game(SDL_Renderer* renderer, int windowWidth, int windowHeight)
 : renderer{renderer}, music{Mix_LoadMUS("res/cutter.wav")}, window_width{windowWidth}, window_height{windowHeight}, map{renderer, window_width, window_height, ""}
 {  
     std::shuffle(requests.begin(), requests.end(), std::default_random_engine{});
+    std::shuffle(maps.begin(), maps.end(), std::default_random_engine{});
+
     texture::loadSpriteSheetPng(renderer, "requests", "requests");
     texture::loadSpriteSheetPng(renderer, "countdown", "countdown");
     texture::loadSpriteSheetPng(renderer, "cutter", "cutter");
@@ -163,10 +165,10 @@ void Game::render(SDL_Renderer* renderer) {
     if(state == 0) {
         std::string texture = "cutter_";
         texture += (mouseDown? "on": "off");
-        drawImage(renderer, texture, vec::vec2f{position.x - 125, position.y - 10}, 0.25f);
+        drawImage(renderer, texture, vec::vec2f{position.x - 125, position.y - 100}, 0.25f);
     } 
 
-    fillRect(renderer, {0, 0, window_width, curtainPos}, {255, 62, 117});
+    fillRect(renderer, {0, 0, window_width, curtainPos}, {63, 101, 166});
     if(state == 1 && timeRunning >= TRANS_TIME + PAUSE_TIME && timeRunning <= STAT_TIME - TRANS_TIME && !firstLoad) {
         //draw score
         drawImage(renderer, "stars_" + std::to_string(score), vec::vec2f{window_width, window_height} / 2 - vec::vec2f{250, 250}, 0.5);
@@ -178,7 +180,7 @@ void Game::setMouse(const int& mouseX, const int& mouseY) {
 }
 
 void Game::cutHair() {
-    Rect cutter{position.x - 50, position.y - 10, 100, 25};
+    Rect cutter{position.x - 50, position.y - 100, 100, 25};
 
     std::vector<int> toDelete{};
     for(int i = 1; i < map.getEntities().size(); i++) {

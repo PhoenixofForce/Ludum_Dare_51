@@ -4,7 +4,7 @@ My entry for the [51st Ludum Dare](https://ldjam.com/events/ludum-dare/51). Made
 
 ## Project Structure
 
-You need to add the SDL2, SDL_image files (.dll, include and lib) yourself (maybe i will add them to a github release). 
+You need to add the SDL2, SDL_image, SDL_mixer files (.dll, include and lib) yourself (maybe i will add them to a github release). 
 ```
 mainFolder
 - include
@@ -15,3 +15,8 @@ mainFolder
 Makefile
 SDL2.dll
 ```
+
+## Credits
+
+- Razor Sound by [Vinrax](https://opengameart.org/content/electric-razor-sfx)
+- Art by [MsPlanlos](https://twitter.com/MsPlanlos) [Instagram](https://www.instagram.com/msplanlos/)

@@ -71,7 +71,6 @@ namespace texture {
 		if (imageSheets.find(textureName) != imageSheets.end()) {
 			return textureImages[imageSheets[textureName]];
 		}
-		std::cout << "direct return for " << textureName << std::endl;
 		return textureImages[textureName];
 	}
 

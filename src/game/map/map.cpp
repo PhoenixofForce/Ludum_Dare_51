@@ -39,10 +39,11 @@ void GameMap::render(SDL_Renderer* renderer, vec::vec2f cameraPosition) {
     }
 
     //anchor
+    /*
     for(int i = 1; i < entities.size(); i++) {
         const Entity& e{ entities.at(i) };
         fillRect(renderer, {e.hitbox.x - 2, e.hitbox.y - 2, 4, 4}, {255, 0, 0});
-    }
+    }*/
 }
 
 const std::string& GameMap::getSheetName() {
@@ -71,6 +72,8 @@ void GameMap::addGameObject(IDMapper idMaps, float depth, int texture, float x, 
         int hairID = rnd::random(0, hairCount) + 1;
 
         textures[0] = textureSheet + "_hair_" + std::to_string(hairID);
+        pos.y -= 35 * scale;
+        pos.x += 10 * scale;
     }
 
     Rect bounds{pos.x, pos.y, 0, 0};
