@@ -59,6 +59,26 @@ int main(int argc, char* argv[]) {
                 int key = event.key.keysym.sym;
                 pressedKeys[key] = true;
             }
+
+            if(event.type == SDL_MOUSEMOTION) {
+                int windowX, windowY;
+                SDL_GetWindowPosition(window, &windowX, &windowY);
+
+                int xMouse, yMouse;
+                SDL_GetGlobalMouseState(&xMouse,&yMouse);
+                xMouse -= windowX;
+                yMouse -= windowY;
+
+                game.setMouse(xMouse, yMouse);
+            }
+
+            if(event.type == SDL_MOUSEBUTTONDOWN) {
+                if(event.button.button == SDL_BUTTON_LEFT) pressedKeys[-101] = true;
+            }
+
+            if(event.type == SDL_MOUSEBUTTONUP) {
+                if(event.button.button == SDL_BUTTON_LEFT) pressedKeys[-101] = false;
+            }
         }
         if(quit) break;
 

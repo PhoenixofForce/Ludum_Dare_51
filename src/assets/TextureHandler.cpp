@@ -73,4 +73,18 @@ namespace texture {
 
 		return textureImages[textureName];
 	}
+
+	void deleteAll() {
+		for(std::map<std::string, SDL_Texture*>::iterator iter = textureImages.begin(); iter != textureImages.end(); ++iter) {
+			SDL_Texture* texture = iter->second;
+			SDL_DestroyTexture(texture);
+		}
+		textureImages.clear();
+		imageRects.clear();
+		imageSheets.clear();
+	}
+
+	int getTextureCount() {
+		return imageSheets.size();
+	}
 }

@@ -10,6 +10,7 @@
 
 #include "../util/structs/vec2f.h"
 #include "../assets/sprite.h"
+#include "../assets/TextureHandler.h"
 
 #include "../util/random.h"
 
@@ -24,16 +25,15 @@ public:
     void render(SDL_Renderer* renderer);
 
     int getScale();
+    void setMouse(const int& mouseX, const int& mouseY);
 
 private: 
     int scale = 5;
     int window_width = 0;
-    int winow_height = 0;
+    int window_height = 0;
 
-    GameMap map{scale, ""};
+    GameMap map;
     vec::vec2f position{144, 4};
-    Sprite grass{500, "sheet_grass", 2};
-
 };
 
 #endif

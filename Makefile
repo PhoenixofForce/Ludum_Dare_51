@@ -8,4 +8,3 @@ all:
 	src/game/game.cpp \
 	-lmingw32 -lSDL2main -llibSDL2 -lSDL2_image
 	@main.exe
-	@del main.exe

@@ -1,27 +1,40 @@
 #include "game.h"
 
-Game::Game(SDL_Renderer* renderer, int windowWidth, int windowHeight) {
-    window_width = windowWidth;
-    winow_height = windowHeight;
-    
-    texture::loadSpriteSheetPng(renderer, "sheet");
-    texture::loadSpriteSheetPng(renderer, "textures_unpacked");
+Game::Game(SDL_Renderer* renderer, int windowWidth, int windowHeight) 
+: window_width{windowWidth}, window_height{window_height}, map{renderer, scale, "res/testMap.map"}
+{    
 
-    map = GameMap(scale, "res/test2.map");
 }
 
 void Game::update(long dt, std::map<int, bool> pressedKeys) {
-    int dx = (pressedKeys[SDLK_d] - pressedKeys[SDLK_a]);
-    int dy = (pressedKeys[SDLK_s] - pressedKeys[SDLK_w]);
+    Rect cutter{position.x - 75, position.y - 25, 150, 50};
+    
+    bool mouseDown = pressedKeys[-101];
+    if(mouseDown) {
+        std::vector<int> toDelete{};
+        for(int i = 1; i < map.getEntities().size(); i++) {
+            Entity& e = map.getEntities().at(i);
 
-    position += vec::vec2f{dx, dy}.normalize(5);
+            //if(cutter.intersects({e.position.xi(), e.position.yi(), e.hitbox.w, e.hitbox.h})) toDelete.push_back(i);
+            if(cutter.intersects(e.hitbox.x, e.hitbox.y)) toDelete.push_back(i);
+        }
+
+        for(int i = toDelete.size() - 1; i >= 0; i--) {
+            map.getEntities().erase(map.getEntities().begin() + toDelete.at(i));
+        }   
+    } 
 }
 
 void Game::render(SDL_Renderer* renderer) {
-    vec::vec2f offset{ position - vec::vec2f{ window_width, winow_height} / 2 };
+    fillRect(renderer, {0, 0, window_width, window_height}, {107, 62, 117});
+    map.render(renderer);
 
-    map.render(renderer, offset);
-    drawImage(renderer, grass.getTexture(), position - offset, scale);
+    Rect cutter{position.x - 75, position.y - 25, 150, 50};
+    fillRect(renderer, cutter, {0, 255, 0});
+}
+
+void Game::setMouse(const int& mouseX, const int& mouseY) {
+    position = {mouseX, mouseY};
 }
 
 int Game::getScale() {

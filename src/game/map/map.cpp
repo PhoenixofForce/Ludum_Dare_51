@@ -1,11 +1,20 @@
 #include "map.h"
 
-GameMap::GameMap(int scale, const std::string& name) {
-    this->scale = scale;
+GameMap::GameMap(SDL_Renderer* renderer, int scale, const std::string& name) 
+: scale(scale)
+{
 
     if(name.length() > 0) loadMap(name, 
-        [this](int tileSize, std::vector<Tag> tags) { this->tileSize = tileSize; },
-        [this](IDMapper mapper, float d, Matrix<int> map) { setTerrain(mapper, d, map); },
+        [this, renderer](int tileSize, std::vector<Tag> tags) { 
+            this->tileSize = tileSize;
+            for(const Tag& tag: tags) {
+                if(tag.header == "import") {
+                    texture::loadSpriteSheetPng(renderer, tag.body);
+                    textureSheet = tag.body;
+                }
+            }    
+        },
+        [this](IDMapper mapper, float d, Matrix<int> map) { },
         [this](IDMapper mapper, float d, int t, float x, float y, std::vector<Tag> tags){ addGameObject(mapper, d, t, x * tileSize, y * tileSize); },
         [](float x1, float y1, float x2, float y2, std::vector<Tag> tags){}
     );
@@ -14,35 +23,54 @@ GameMap::GameMap(int scale, const std::string& name) {
 void GameMap::update(long dt, std::map<int, bool> pressedKeys) {}
 
 void GameMap::render(SDL_Renderer* renderer, vec::vec2f cameraPosition) {
-    for(int x = 0; x < terrain.getWidth(); x++) {
-        for(int y = 0; y < terrain.getHeight(); y++) {
-            const std::string& texture { terrain.get(x, y) };
-            vec::vec2f pos{x, y};
-            pos *= scale * tileSize;
-            if(texture.length() > 0) drawImage(renderer, texture, pos - cameraPosition, scale);
-        }
+    //face
+    drawImage(renderer, entities[0].sprite.getTexture(), entities[0].position - cameraPosition, scale);
+
+    //outline
+    for(int i = 1; i < entities.size(); i++) {
+        const Entity& e{ entities.at(i) };
+        drawImage(renderer, e.sprite.getTexture() + "_outline", e.position - cameraPosition, scale);
     }
 
-    for(const Entity& e: entities) {
+    //hair
+    for(int i = 1; i < entities.size(); i++) {
+        const Entity& e{ entities.at(i) };
         drawImage(renderer, e.sprite.getTexture(), e.position - cameraPosition, scale);
     }
-}
 
-void GameMap::setTerrain(IDMapper mapper, float d, Matrix<int> map) {
-    terrain = Matrix<std::string>(map.getWidth(), map.getHeight());
-    for(int x = 0; x < map.getWidth(); x++) {
-        for(int y = 0; y < map.getHeight(); y++) {
-            int texture = map.get(x, y);
-            terrain.set(x, y, texture == 0? "": mapper[texture]);
-        }
+    //anchor
+    for(int i = 1; i < entities.size(); i++) {
+        const Entity& e{ entities.at(i) };
+        fillRect(renderer, {e.hitbox.x - 2, e.hitbox.y - 2, 4, 4}, {255, 0, 0});
     }
 }
 
 void GameMap::addGameObject(IDMapper idMaps, float depth, int texture, float x, float y) {
+    int hairCount = (texture::getTextureCount() - 2)  / 2; //-1(face) -1 (anchor) / 2 (hair / outline)  
+    int hairID = rnd::random(0, hairCount) + 1;
+
     vec::vec2f pos{ x * scale, y * scale };
-    std::string textures[1]{ idMaps[texture] };
+    std::string textures[1]{ 
+        idMaps[texture]
+     };
+
+    bool isHair = false;
+    if(textures[0].find("anchor") != std::string::npos) {
+        isHair = true;
+        textures[0] = textureSheet + "_hair_" + std::to_string(hairID);
+    }
+    //std::cout << textures[0] << std::endl;
+
+    Rect bounds{pos.x, pos.y, 0, 0};
+    bounds.w = texture::getSpriteSheetBounds(textures[0]).w * scale;
+    bounds.h = texture::getSpriteSheetBounds(textures[0]).h * scale;
+    
+    if(isHair) pos.x -= bounds.w / 2; 
 
     Sprite sprite{100, textures};
-    entities.push_back({pos, sprite });
+    entities.push_back({ pos, sprite, bounds });
 }
 
+std::vector<Entity>& GameMap::getEntities() {
+    return entities;
+}

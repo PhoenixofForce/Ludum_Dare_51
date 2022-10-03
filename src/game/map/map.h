@@ -1,7 +1,10 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include <SDL2/SDL.h>
+
 #include "maploader.h"
+#include "../../util/random.h"
 #include "../../util/structs/matrix.h"
 #include "../entities/entity.h"
 #include "../../util/structs/vec2f.h"
@@ -10,19 +13,21 @@
 class GameMap {
 
 public:
-    GameMap(int scale, const std::string& name);
+    GameMap(SDL_Renderer* renderer, int scale, const std::string& name);
 
     void update(long dt, std::map<int, bool> pressedKeys);
-    void render(SDL_Renderer* renderer, vec::vec2f cameraPosition);
+    void render(SDL_Renderer* renderer, vec::vec2f cameraPosition = vec::vec2f{});
+
+    std::vector<Entity>& getEntities();
 
 private:
     int tileSize;
     int scale;
 
-    Matrix<std::string> terrain{1, 1};
+    std::string textureSheet{};
+
     std::vector<Entity> entities;
 
-    void setTerrain(IDMapper mapper, float d, Matrix<int> map);
     void addGameObject(IDMapper idMaps, float depth, int texture, float x, float y);
 };
 
