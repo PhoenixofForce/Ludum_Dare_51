@@ -2,6 +2,8 @@
 
 My entry for the [51st Ludum Dare](https://ldjam.com/events/ludum-dare/51). Made with [SDL2](https://www.libsdl.org/download-2.0.php) and SDL2_image in c++.
 
+See the entry [here](https://ldjam.com/events/ludum-dare/51/speed-barber)!
+
 ## Project Structure
 
 You need to add the SDL2, SDL_image, SDL_mixer files (.dll, include and lib) yourself (maybe i will add them to a github release). 

@@ -22,6 +22,7 @@ Game::Game(SDL_Renderer* renderer, int windowWidth, int windowHeight)
     std::shuffle(requests.begin(), requests.end(), std::default_random_engine{});
     std::shuffle(maps.begin(), maps.end(), std::default_random_engine{});
 
+    texture::loadSpriteSheetPng(renderer, "cover", "cover");
     texture::loadSpriteSheetPng(renderer, "requests", "requests");
     texture::loadSpriteSheetPng(renderer, "countdown", "countdown");
     texture::loadSpriteSheetPng(renderer, "cutter", "cutter");
@@ -168,10 +169,10 @@ void Game::render(SDL_Renderer* renderer) {
         drawImage(renderer, texture, vec::vec2f{position.x - 125, position.y - 100}, 0.25f);
     } 
 
-    fillRect(renderer, {0, 0, window_width, curtainPos}, {63, 101, 166});
-    if(state == 1 && timeRunning >= TRANS_TIME + PAUSE_TIME && timeRunning <= STAT_TIME - TRANS_TIME && !firstLoad) {
-        //draw score
-        drawImage(renderer, "stars_" + std::to_string(score), vec::vec2f{window_width, window_height} / 2 - vec::vec2f{250, 250}, 0.5);
+    if(!firstLoad) fillRect(renderer, {0, 0, window_width, curtainPos}, {63, 101, 166});
+    if(state == 1 && timeRunning >= TRANS_TIME + PAUSE_TIME && timeRunning <= STAT_TIME - TRANS_TIME) {
+        if(!firstLoad) drawImage(renderer, "stars_" + std::to_string(score), vec::vec2f{window_width, window_height} / 2 - vec::vec2f{250, 250}, 0.5);
+        else drawImage(renderer, "cover_cover", vec::vec2f{}, 1);
     }
 }
 
