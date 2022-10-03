@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 
 #include <string>
 
@@ -14,6 +15,8 @@ int main(int argc, char* argv[]) {
     std::cout.precision(17);
 
     SDL_Init(SDL_INIT_EVERYTHING);
+    Mix_Init(0);
+    
     SDL_Window* window {
         SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI)
     };
@@ -22,6 +25,9 @@ int main(int argc, char* argv[]) {
         std::cout << "Window couldnt be created: " << SDL_GetError() << std::endl;
         return 1;
     }
+
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024);
+    Mix_VolumeMusic(40);
 
     SDL_Renderer* renderer{SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)};
     SDL_Event event;

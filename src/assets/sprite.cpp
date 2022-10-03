@@ -9,6 +9,12 @@ Sprite::Sprite(int time, const std::string& spriteName, int count) {
     }
 }
 
+Sprite::Sprite(int time, std::vector<std::string> textures) {
+    this-> time = time;
+    spriteList = textures;
+}
+
+
 const std::string& Sprite::getTexture(long start, long current) const {
     return spriteList.at(((int) ((current-start) / time)) % spriteList.size());
 }
@@ -18,5 +24,9 @@ const std::string& Sprite::getTexture(long start) const {
 }
 
 const std::string& Sprite::getTexture() const {
-    return getTexture(0);
+    return getTexture(start);
+}
+
+void Sprite::reset() {
+    start = clck::getCurrentTime();
 }

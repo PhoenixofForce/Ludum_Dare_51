@@ -18,17 +18,19 @@ public:
         }
     }
     Sprite(int time, const std::string& spriteName, int count);
+    Sprite(int time, std::vector<std::string> textures);
 
     const std::string& getTexture(long start, long current) const;
 
     const std::string& getTexture(long start) const;
 
     const std::string& getTexture() const;
+    void reset();
 
 private:
     int time;
+    long start = 0;
     std::vector<std::string> spriteList{};
-
 };
 
 

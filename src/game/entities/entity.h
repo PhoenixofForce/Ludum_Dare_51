@@ -11,4 +11,9 @@ struct Entity {
     Rect hitbox;
 };
 
+struct Request {
+    std::string name;
+    std::vector<Rect> hitboxes;
+};
+
 #endif

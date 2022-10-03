@@ -14,7 +14,7 @@ struct Rect {
     int w{1};
     int h{1};
 
-    bool intersects(const Rect& r2) {
+    bool intersects(const Rect& r2) const {
         return !(
             r2.x > x + w ||
             r2.x + r2.w < x ||
@@ -23,7 +23,7 @@ struct Rect {
         );
     }
 
-    bool intersects(const int& x, const int& y) {
+    bool intersects(const int& x, const int& y) const {
         return intersects(Rect{x, y, 1, 1});
     }
 };

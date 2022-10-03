@@ -6,5 +6,5 @@ all:
 	src/assets/sprite.cpp src/assets/TextureHandler.cpp \
 	src/game/map/map.cpp src/game/map/maploader.cpp \
 	src/game/game.cpp \
-	-lmingw32 -lSDL2main -llibSDL2 -lSDL2_image
+	-lmingw32 -lSDL2main -llibSDL2 -lSDL2_image -lSDL2_mixer
 	@main.exe

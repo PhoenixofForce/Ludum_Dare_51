@@ -14,7 +14,7 @@ void drawRect(SDL_Renderer* renderer, const Rect& r, const Color& c) {
     SDL_RenderDrawRect(renderer, &rect);
 }
 
-void drawImage(SDL_Renderer* renderer, const std::string& textureName, const vec::vec2f& position, int scale) {
+void drawImage(SDL_Renderer* renderer, const std::string& textureName, const vec::vec2f& position, float scale) {
     SDL_Texture* texture{ texture::getSpriteSheet(textureName) };
     const Rect& source{ texture::getSpriteSheetBounds(textureName) };
 

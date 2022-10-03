@@ -1,7 +1,7 @@
 #include "map.h"
 
-GameMap::GameMap(SDL_Renderer* renderer, int inWindowWidth, int inWindowHeight, int inScale, const std::string& name) 
-: scale(inScale), windowWidth(inWindowWidth), windowHeight(inWindowHeight)
+GameMap::GameMap(SDL_Renderer* renderer, int inWindowWidth, int inWindowHeight, const std::string& name) 
+: scale(0.5f), windowWidth(inWindowWidth), windowHeight(inWindowHeight)
 {
 
     if(name.length() > 0) loadMap("res/" + name + ".map", 
@@ -50,9 +50,17 @@ const std::string& GameMap::getSheetName() {
 }
 
 void GameMap::addGameObject(IDMapper idMaps, float depth, int texture, float x, float y) {
+    static vec::vec2f offsetToMiddle{};
+
     std::string textures[1]{ 
         idMaps[texture]
      };
+
+    if(entitiesLoaded == 0) {
+        const Rect& bounds{ texture::getSpriteSheetBounds(textures[0]) };
+        scale = 800.0 / bounds.h;
+        std::cout << scale << " - scale calculated" << std::endl;
+    }
 
     vec::vec2f pos{ x * scale, y * scale };
 
@@ -72,10 +80,8 @@ void GameMap::addGameObject(IDMapper idMaps, float depth, int texture, float x, 
     if(isHair) pos.x -= bounds.w / 2; 
 
     //Center Everything
-    static int entityID = 0;
-    static vec::vec2f offsetToMiddle{};
-    if(entityID == 0) {
-        entityID++;
+    if(entitiesLoaded == 0) {
+        entitiesLoaded++;
         offsetToMiddle = vec::vec2f{windowWidth, windowHeight} / 2 - vec::vec2f{bounds.w, bounds.h} / 2 - pos;
     }
     pos += offsetToMiddle;
@@ -85,7 +91,12 @@ void GameMap::addGameObject(IDMapper idMaps, float depth, int texture, float x, 
     Sprite sprite{100, textures};
     if(!isHair) {
         textures[0] = textureSheet + "_face";
-        sprite = Sprite{100, textures[0], texture::getTextureCount(textures[0])};
+
+        std::vector<std::string> texturesList{};
+        for(int i = 0; i < 20; i++) texturesList.push_back(textures[0] + "_0");
+        for(int i = 1; i < texture::getTextureCount(textures[0]); i++) texturesList.push_back(textures[0] + "_" + std::to_string(i));
+
+        sprite = Sprite{200, texturesList};
     }
 
     entities.push_back({ pos, sprite, bounds });
