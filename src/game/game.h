@@ -46,6 +46,7 @@ private:
     int benchmarkOutside;
 
     int score = 0;
+    int totalScore = 0;
 
     bool firstLoad = true;
     bool playingMusic = false;

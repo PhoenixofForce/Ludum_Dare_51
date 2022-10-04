@@ -6,14 +6,16 @@
 
 std::vector<std::string> maps{"level_1", "level_2", "level_3", "level_4", "level_5"};
 std::vector<Request> requests {
-  {"goat", std::vector<Rect>{{462, 508, 162, 183}}},
+    
+  {"goat", std::vector<Rect>{{462, 458, 162, 183}}},
   {"u", std::vector<Rect>{{397, 352, 62, 124}, {623, 343, 62, 141}, {462, 508, 162, 75}}},
-  {"w", std::vector<Rect>{{397, 352, 62, 200}, {623, 343, 62, 200}, {489, 456, 107, 45}}},
-  {"trident", std::vector<Rect>{{425, 454, 290, 100}}},
+  {"trident", std::vector<Rect>{{425, 454, 290, 100}, {489, 416, 107, 55}}},
   {"cotlet", std::vector<Rect>{{397, 352, 62, 124}, {623, 343, 62, 141}}},
-  {"full", std::vector<Rect>{{400, 454, 290, 150}}},
-  {"lip", std::vector<Rect>{{489, 456, 107, 45}}},
-  {"chin", std::vector<Rect>{{462, 508, 162, 75}}}
+  {"full", std::vector<Rect>{{400, 416, 290, 190}}},
+  {"lip", std::vector<Rect>{{489, 416, 107, 55}}},
+  {"chin", std::vector<Rect>{{462, 508, 162, 75}}},
+    {"w", std::vector<Rect>{{397, 352, 62, 200}, {623, 343, 62, 200}, {459, 416, 167, 55}}},
+
 };
 
 Game::Game(SDL_Renderer* renderer, int windowWidth, int windowHeight) 
@@ -79,7 +81,7 @@ void Game::update(long dt, std::map<int, bool> pressedKeys) {
                 int hairOutside = 0;
                 countHair(hairInside, hairOutside);
 
-                if(hairInside == benchmarkInside && hairOutside == benchmarkOutside) {
+                if((hairInside == benchmarkInside && hairOutside == benchmarkOutside) ||hairInside == 0) {
                     score = 0;
                 } else {
                     std::cout << hairInside << "/" << benchmarkInside << " hairs kept inside" << std::endl;
@@ -90,7 +92,7 @@ void Game::update(long dt, std::map<int, bool> pressedKeys) {
                     float insideAccuracy = 1.0 * hairInside / benchmarkInside;
                     float outsideAccuracy = 1.0 * hairOutside/ benchmarkOutside;
 
-                    float balancedAccuracy = (insideAccuracy + 2 * outsideAccuracy) / 3.0;
+                    float balancedAccuracy = (insideAccuracy + outsideAccuracy) / 2.0;
 
                     std::cout << "----------------" << std::endl;
                     std::cout << "inside%:  " << insideAccuracy << std::endl;
@@ -98,11 +100,10 @@ void Game::update(long dt, std::map<int, bool> pressedKeys) {
                     std::cout << "total%:   " << balancedAccuracy << std::endl;
                     std::cout << "score:    " << (balancedAccuracy * 5.0) << std::endl;
 
-                    score = std::round(balancedAccuracy * 5.0);
-                    score = std::min(5, score);
-
-                    if(hairInside == 0) score = 0;
+                    score = std::round(balancedAccuracy * 4.0);
+                    score = std::min(4, score) + 1;
                 }
+                totalScore += score;
 
                 std::cout << std::endl << "SCORE: " << score << std::endl << std::endl;
             }
@@ -169,6 +170,11 @@ void Game::render(SDL_Renderer* renderer) {
     drawImage(renderer, "requests_" + requests.at(0).name, vec::vec2f{window_width - 300, 0}, 0.25f);
     drawImage(renderer, countdown.getTexture(), vec::vec2f{}, 0.15f);
 
+    //for(Rect& r: requests.at(0).hitboxes) {
+    //    drawRect(renderer, r, {255, 0, 0});
+    //}
+
+
     if(state == 0) {
         std::string texture = "cutter_";
         texture += (mouseDown? "on": "off");
@@ -177,8 +183,23 @@ void Game::render(SDL_Renderer* renderer) {
 
     if(!firstLoad) fillRect(renderer, {0, 0, window_width, curtainPos}, {63, 101, 166});
     if(state == 1 && timeRunning >= TRANS_TIME + PAUSE_TIME && timeRunning <= STAT_TIME - TRANS_TIME) {
-        if(!firstLoad) drawImage(renderer, "stars_" + std::to_string(score), vec::vec2f{window_width, window_height} / 2 - vec::vec2f{250, 250}, 0.5);
-        else drawImage(renderer, "cover_cover", vec::vec2f{}, 1);
+        if(!firstLoad) {
+            drawImage(renderer, "stars_" + std::to_string(score), vec::vec2f{window_width, window_height} / 2 - vec::vec2f{250, 250}, 0.5);
+            
+            //total score
+            drawImage(renderer, "stars_1", vec::vec2f{window_width - 150, -35}, 0.15);
+
+            std::string totalString{ std::to_string(totalScore) };
+            int x = window_width - 150;
+            for(int i = totalString.size() - 1; i >= 0; i--) {
+                std::string letterTexture{ "countdown_" };
+                letterTexture += totalString.at(i);
+
+                drawImage(renderer, letterTexture, vec::vec2f{x, 0}, 0.075f);
+                x -= 40;
+            }
+
+        } else drawImage(renderer, "cover_cover", vec::vec2f{}, 1);
     }
 }
 
