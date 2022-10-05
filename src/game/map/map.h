@@ -21,6 +21,8 @@ public:
     std::vector<Entity>& getEntities();
     const std::string& getSheetName();
 
+    float getScale();
+
 private:
     int tileSize{1};
     float scale{1};

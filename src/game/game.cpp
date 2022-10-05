@@ -9,12 +9,12 @@ std::vector<Request> requests {
     
   {"goat", std::vector<Rect>{{462, 458, 162, 183}}},
   {"u", std::vector<Rect>{{397, 352, 62, 124}, {623, 343, 62, 141}, {462, 508, 162, 75}}},
+  {"w", std::vector<Rect>{{397, 352, 62, 200}, {623, 343, 62, 200}, {459, 416, 167, 55}}},
   {"trident", std::vector<Rect>{{425, 454, 290, 100}, {489, 416, 107, 55}}},
   {"cotlet", std::vector<Rect>{{397, 352, 62, 124}, {623, 343, 62, 141}}},
   {"full", std::vector<Rect>{{400, 416, 290, 190}}},
   {"lip", std::vector<Rect>{{489, 416, 107, 55}}},
-  {"chin", std::vector<Rect>{{462, 508, 162, 75}}},
-    {"w", std::vector<Rect>{{397, 352, 62, 200}, {623, 343, 62, 200}, {459, 416, 167, 55}}},
+  {"chin", std::vector<Rect>{{462, 508, 162, 75}}}
 
 };
 
@@ -45,6 +45,18 @@ void Game::update(long dt, std::map<int, bool> pressedKeys) {
     if(state == 0) {
         curtainPos = 0;
         firstLoad = false;
+
+        for(int i = particles.size() - 1; i >= 0; i--) {
+            Entity& p{ particles.at(i) };
+            p.hitbox.x += p.position.xi();
+            p.hitbox.y += p.position.yi();
+
+            p.position.y += 2;
+
+            if(p.hitbox.y > window_height) {
+                particles.erase(particles.begin() + i);
+            }
+        }
 
         if(timeRunning >= 10000) {
             std::cout << std::endl << std::endl << std::endl << "10s passed" << std::endl;
@@ -77,6 +89,8 @@ void Game::update(long dt, std::map<int, bool> pressedKeys) {
 
         if(timeRunning > PAUSE_TIME && timeRunning <= TRANS_TIME + PAUSE_TIME) {
             if(reloadMap) {
+                particles.clear();
+
                 int hairInside = 0;
                 int hairOutside = 0;
                 countHair(hairInside, hairOutside);
@@ -167,6 +181,11 @@ void Game::render(SDL_Renderer* renderer) {
     drawImage(renderer, "bg_bg", offset);
 
     map.render(renderer);
+
+    for(Entity& e: particles) {
+        drawImage(renderer, e.sprite.getTexture(), {e.hitbox.x, e.hitbox.y}, map.getScale());
+    }
+
     drawImage(renderer, "requests_" + requests.at(0).name, vec::vec2f{window_width - 300, 0}, 0.25f);
     drawImage(renderer, countdown.getTexture(), vec::vec2f{}, 0.15f);
 
@@ -174,18 +193,19 @@ void Game::render(SDL_Renderer* renderer) {
     //    drawRect(renderer, r, {255, 0, 0});
     //}
 
-
     if(state == 0) {
         std::string texture = "cutter_";
         texture += (mouseDown? "on": "off");
         drawImage(renderer, texture, vec::vec2f{position.x - 125, position.y - 100}, 0.25f);
+
+        //drawRect(renderer, {position.xi() - 40, position.yi() - 95, 80, 25}, {255, 0, 0});
     } 
 
     if(!firstLoad) fillRect(renderer, {0, 0, window_width, curtainPos}, {63, 101, 166});
     if(state == 1 && timeRunning >= TRANS_TIME + PAUSE_TIME && timeRunning <= STAT_TIME - TRANS_TIME) {
         if(!firstLoad) {
             drawImage(renderer, "stars_" + std::to_string(score), vec::vec2f{window_width, window_height} / 2 - vec::vec2f{250, 250}, 0.5);
-            
+
             //total score
             drawImage(renderer, "stars_1", vec::vec2f{window_width - 150, -35}, 0.15);
 
@@ -204,11 +224,12 @@ void Game::render(SDL_Renderer* renderer) {
 }
 
 void Game::setMouse(const int& mouseX, const int& mouseY) {
+    lastPosition = position;
     position = {mouseX, mouseY};
 }
 
 void Game::cutHair() {
-    Rect cutter{position.x - 50, position.y - 100, 100, 25};
+    Rect cutter{position.x - 40, position.y - 95, 80, 25};
 
     std::vector<int> toDelete{};
     for(int i = 1; i < map.getEntities().size(); i++) {
@@ -218,7 +239,22 @@ void Game::cutHair() {
         if(cutter.intersects(e.hitbox.x, e.hitbox.y)) toDelete.push_back(i);
     }
 
+    vec::vec2f mouseDX{ position - lastPosition };
     for(int i = toDelete.size() - 1; i >= 0; i--) {
+        Entity deletedEntity{ map.getEntities().at(toDelete.at(i)) };
+
+        float flyingDirection = deletedEntity.position.x - position.x;
+        Entity particle{
+            vec::vec2f{flyingDirection + rnd::random(0, 5) * (flyingDirection < 0? -1: 1), 10}.normalize(10), 
+            deletedEntity.sprite, 
+            Rect{deletedEntity.position.xi(), deletedEntity.position.yi(), 1, 1} 
+        };
+        particle.position.y = -10 * (mouseDX.y < 0? 1: -1);
+
+        particles.push_back(
+            particle
+        );
+
         map.getEntities().erase(map.getEntities().begin() + toDelete.at(i));
     }   
 }

@@ -53,7 +53,11 @@ private:
     bool mouseDown = false;
 
     GameMap map;
+    std::vector<Entity> particles{};
+
     vec::vec2f position{0, 0};
+    vec::vec2f lastPosition{0, 0};
+
     Sprite countdown{1000, "", 0};
 
     void cutHair();

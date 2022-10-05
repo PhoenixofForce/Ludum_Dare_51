@@ -108,3 +108,7 @@ void GameMap::addGameObject(IDMapper idMaps, float depth, int texture, float x, 
 std::vector<Entity>& GameMap::getEntities() {
     return entities;
 }
+
+float GameMap::getScale() {
+    return scale;
+}
