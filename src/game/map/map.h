@@ -21,6 +21,7 @@ public:
     std::vector<Entity>& getEntities();
     const std::string& getSheetName();
 
+    void handleResize(const int& newWidth, const int& newHeight);
     float getScale();
 
 private:

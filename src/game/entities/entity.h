@@ -9,6 +9,7 @@ struct Entity {
     vec::vec2f position;
     Sprite sprite;
     Rect hitbox;
+    vec::vec2f originPosition;
 };
 
 struct Request {

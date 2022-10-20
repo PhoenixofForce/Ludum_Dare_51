@@ -4,20 +4,22 @@ GameMap::GameMap(SDL_Renderer* renderer, int inWindowWidth, int inWindowHeight, 
 : scale(0.5f), windowWidth(inWindowWidth), windowHeight(inWindowHeight)
 {
 
-    if(name.length() > 0) loadMap("res/" + name + ".map", 
-        [this, renderer](int tileSize, std::vector<Tag> tags) { 
-            this->tileSize = tileSize;
-            for(const Tag& tag: tags) {
-                if(tag.header == "import") {
-                    texture::loadSpriteSheetPng(renderer, tag.body);
-                    textureSheet = tag.body;
-                }
-            }    
-        },
-        [this](IDMapper mapper, float d, Matrix<int> map) { },
-        [this](IDMapper mapper, float d, int t, float x, float y, std::vector<Tag> tags){ addGameObject(mapper, d, t, x * tileSize, y * tileSize); },
-        [](float x1, float y1, float x2, float y2, std::vector<Tag> tags){}
-    );
+    if(name.length() > 0) {
+        loadMap("res/" + name + ".map", 
+            [this, renderer](int tileSize, std::vector<Tag> tags) { 
+                this->tileSize = tileSize;
+                for(const Tag& tag: tags) {
+                    if(tag.header == "import") {
+                        texture::loadSpriteSheetPng(renderer, tag.body);
+                        textureSheet = tag.body;
+                    }
+                }    
+            },
+            [this](IDMapper mapper, float d, Matrix<int> map) { },
+            [this](IDMapper mapper, float d, int t, float x, float y, std::vector<Tag> tags){ addGameObject(mapper, d, t, x * tileSize, y * tileSize); },
+            [](float x1, float y1, float x2, float y2, std::vector<Tag> tags){}
+        );
+    }
 }
 
 void GameMap::update(long dt, std::map<int, bool> pressedKeys) {}
@@ -58,15 +60,17 @@ void GameMap::addGameObject(IDMapper idMaps, float depth, int texture, float x, 
      };
 
     if(entitiesLoaded == 0) {
+        float desiredFaceSize = 1.0f * windowHeight * (800.0f / 720.0f);
+
         const Rect& bounds{ texture::getSpriteSheetBounds(textures[0]) };
-        scale = 800.0 / bounds.h;
+        scale = desiredFaceSize / bounds.h;
         std::cout << scale << " - scale calculated" << std::endl;
     }
 
     vec::vec2f pos{ x * scale, y * scale };
 
     //Get Random Hair texture
-    bool isHair = (textures[0].find("anchor") != std::string::npos);
+    bool isHair = entitiesLoaded != 0;
     if(isHair) {
         int hairCount = texture::getTextureCount("hair") / 2;
         int hairID = rnd::random(0, hairCount) + 1;
@@ -102,11 +106,34 @@ void GameMap::addGameObject(IDMapper idMaps, float depth, int texture, float x, 
         sprite = Sprite{200, texturesList};
     }
 
-    entities.push_back({ pos, sprite, bounds });
+    entities.push_back({ pos, sprite, bounds, vec::vec2f{x, y} });
 }
 
 std::vector<Entity>& GameMap::getEntities() {
     return entities;
+}
+
+void GameMap::handleResize(const int& newWidth, const int& newHeight) {
+    float oldScale = scale;
+
+    windowWidth = newWidth;
+    windowHeight = newHeight;
+
+    //reload all entities
+    std::vector<Entity> oldEntities = entities;
+    entities.clear(); 
+    std::cout << entities.size() << " entities remaining" << std::endl;;
+
+    entitiesLoaded = 0;
+
+    int entityPos = 0;
+    for(Entity& e: oldEntities) {
+        IDMapper singleMapper{};
+        singleMapper[0] = e.sprite.getTexture();
+
+        addGameObject(singleMapper, 0, 0, e.originPosition.x, e.originPosition.y);
+        entityPos++;
+    }
 }
 
 float GameMap::getScale() {

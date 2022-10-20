@@ -29,6 +29,7 @@ public:
     void render(SDL_Renderer* renderer);
 
     void setMouse(const int& mouseX, const int& mouseY);
+    void handleResize(const int& newWidth, const int& newHeight);
 
 private: 
     SDL_Renderer* renderer;

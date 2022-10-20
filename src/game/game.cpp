@@ -1,12 +1,13 @@
 #include "game.h"
 
+//DEFAULT_SCALE is the intended map scale on default resolution
+#define DEFAULT_SCALE 0.53333336114883423f
 #define STAT_TIME 5000
 #define TRANS_TIME 200
 #define PAUSE_TIME 500
 
 std::vector<std::string> maps{"level_1", "level_2", "level_3", "level_4", "level_5"};
 std::vector<Request> requests {
-    
   {"goat", std::vector<Rect>{{462, 458, 162, 183}}},
   {"u", std::vector<Rect>{{397, 352, 62, 124}, {623, 343, 62, 141}, {462, 508, 162, 75}}},
   {"w", std::vector<Rect>{{397, 352, 62, 200}, {623, 343, 62, 200}, {459, 416, 167, 55}}},
@@ -42,10 +43,11 @@ void Game::update(long dt, std::map<int, bool> pressedKeys) {
     timeRunning += dt;
     mouseDown = pressedKeys[-101];
 
-    if(state == 0) {
+    if(state == 0) { //Cutting phase
         curtainPos = 0;
         firstLoad = false;
 
+        //update particles
         for(int i = particles.size() - 1; i >= 0; i--) {
             Entity& p{ particles.at(i) };
             p.hitbox.x += p.position.xi();
@@ -58,12 +60,14 @@ void Game::update(long dt, std::map<int, bool> pressedKeys) {
             }
         }
 
+        //change to evaluation stage
         if(timeRunning >= 10000) {
             std::cout << std::endl << std::endl << std::endl << "10s passed" << std::endl;
             timeRunning = 1;
             state = 1;
         }
         
+        //Cut hair and play razor sounds
         if(mouseDown) {
             cutHair();
 
@@ -79,9 +83,10 @@ void Game::update(long dt, std::map<int, bool> pressedKeys) {
         }
     }
 
-    if(state == 1) {
+    if(state == 1) {    //Eval Stage
         static bool reloadMap = false;
 
+        //Stop razor sounds
         if(playingMusic) {
             playingMusic = false;
             Mix_Pause(0);
@@ -95,7 +100,8 @@ void Game::update(long dt, std::map<int, bool> pressedKeys) {
                 int hairOutside = 0;
                 countHair(hairInside, hairOutside);
 
-                if((hairInside == benchmarkInside && hairOutside == benchmarkOutside) ||hairInside == 0) {
+                //calculate score
+                if((hairInside == benchmarkInside && hairOutside == benchmarkOutside) || hairInside == 0) {
                     score = 0;
                 } else {
                     std::cout << hairInside << "/" << benchmarkInside << " hairs kept inside" << std::endl;
@@ -122,6 +128,7 @@ void Game::update(long dt, std::map<int, bool> pressedKeys) {
                 std::cout << std::endl << "SCORE: " << score << std::endl << std::endl;
             }
 
+            //pull curtain down
             curtainPos = (1.0 * (timeRunning - PAUSE_TIME) / TRANS_TIME) * window_height;
             reloadMap = false;
         }
@@ -149,11 +156,13 @@ void Game::update(long dt, std::map<int, bool> pressedKeys) {
             }
         }
 
+        //pull curtain up
         if(timeRunning > STAT_TIME - TRANS_TIME) {
             curtainPos = (1.0 * (STAT_TIME - timeRunning) / TRANS_TIME) * window_height;
             countdown.reset();
         }
 
+        //change to cutting stage
         if(timeRunning >= STAT_TIME) {
             curtainPos = 0;
             timeRunning = 1;
@@ -166,43 +175,67 @@ void Game::update(long dt, std::map<int, bool> pressedKeys) {
 void Game::render(SDL_Renderer* renderer) {
     fillRect(renderer, {0, 0, window_width, window_height}, {107, 62, 117});
 
+    //background offset, so that the background moves a little when the mouse moves
     vec::vec2f offset{
         position.x - window_width / 2,
         position.y - window_height / 2
     };
     offset.normalize(-12);
 
+    //screenshake when the razor is on
     if(mouseDown) {
         offset.x += std::sin(1.0 * timeRunning / 10.0) * 2;
         offset.y += std::sin(1.0 * timeRunning / 10.0 + 3.141592 / 4) * 2;
     }
 
-    drawImage(renderer, "bg_bg", vec::vec2f{});
-    drawImage(renderer, "bg_bg", offset);
+    //draws the background with and without the offset, so that there are no black parts
+    float bgScale = 1;
+    {
+        const Rect& bgBounds = texture::getSpriteSheetBounds("bg_bg");
+        float scaleX = 1.0f * window_width / bgBounds.w;
+        float scaleY = 1.0f * window_height / bgBounds.h;
+        bgScale = std::max(scaleX, scaleY);
+    }
 
+    drawImage(renderer, "bg_bg", vec::vec2f{}, bgScale);
+    drawImage(renderer, "bg_bg", offset, bgScale);
+
+    //render map, hair particles, requests and countdown
     map.render(renderer);
-
     for(Entity& e: particles) {
         drawImage(renderer, e.sprite.getTexture(), {e.hitbox.x, e.hitbox.y}, map.getScale());
     }
-
     drawImage(renderer, "requests_" + requests.at(0).name, vec::vec2f{window_width - 300, 0}, 0.25f);
     drawImage(renderer, countdown.getTexture(), vec::vec2f{}, 0.15f);
 
-    //for(Rect& r: requests.at(0).hitboxes) {
-    //    drawRect(renderer, r, {255, 0, 0});
-    //}
+    
+    // Draw Hitboxes of the current request
+    /*
+    float razorScale = (map.getScale() / DEFAULT_SCALE);
+    for(Rect& r2: requests.at(0).hitboxes) {
+        Rect r{ (r2.x - 1080/2) * razorScale + window_width/2, r2.y * razorScale, r2.w * razorScale, r2.h * razorScale };
+        drawRect(renderer, r, {255, 0, 0});
+    }
+    */
 
+    //draws the razor
     if(state == 0) {
         std::string texture = "cutter_";
         texture += (mouseDown? "on": "off");
-        drawImage(renderer, texture, vec::vec2f{position.x - 125, position.y - 100}, 0.25f);
 
-        //drawRect(renderer, {position.xi() - 40, position.yi() - 95, 80, 25}, {255, 0, 0});
+        float razorScale = (map.getScale() / DEFAULT_SCALE);
+        drawImage(renderer, texture, vec::vec2f{position.x - 125 * razorScale, position.y - 100 * razorScale}, 0.25f * razorScale);
+
+        //draws razor hitbox
+        /*
+        Rect cutter{position.x - 40 * razorScale, position.y - 95 * razorScale, 80 * razorScale, 25 * razorScale};
+        drawRect(renderer, cutter, {255, 0, 0});
+        */
     } 
 
     if(!firstLoad) fillRect(renderer, {0, 0, window_width, curtainPos}, {63, 101, 166});
     if(state == 1 && timeRunning >= TRANS_TIME + PAUSE_TIME && timeRunning <= STAT_TIME - TRANS_TIME) {
+        //draw the score and total score
         if(!firstLoad) {
             drawImage(renderer, "stars_" + std::to_string(score), vec::vec2f{window_width, window_height} / 2 - vec::vec2f{250, 250}, 0.5);
 
@@ -219,8 +252,16 @@ void Game::render(SDL_Renderer* renderer) {
                 x -= 40;
             }
 
-        } else drawImage(renderer, "cover_cover", vec::vec2f{}, 1);
+        }
+        //if the game loads the first time, draw the cover image instead
+        else drawImage(renderer, "cover_cover", vec::vec2f{}, bgScale);
     }
+}
+
+void Game::handleResize(const int& newWidth, const int& newHeight) {
+    window_width = newWidth;
+    window_height = newHeight;
+    map.handleResize(newWidth, newHeight);
 }
 
 void Game::setMouse(const int& mouseX, const int& mouseY) {
@@ -229,13 +270,14 @@ void Game::setMouse(const int& mouseX, const int& mouseY) {
 }
 
 void Game::cutHair() {
-    Rect cutter{position.x - 40, position.y - 95, 80, 25};
+    float razorScale = (map.getScale() / DEFAULT_SCALE);
+    Rect cutter{position.x - 40 * razorScale, position.y - 95 * razorScale, 80 * razorScale, 25 * razorScale};
 
     std::vector<int> toDelete{};
     for(int i = 1; i < map.getEntities().size(); i++) {
         Entity& e = map.getEntities().at(i);
 
-        //if(cutter.intersects({e.position.xi(), e.position.yi(), e.hitbox.w, e.hitbox.h})) toDelete.push_back(i);
+        //if(cutter.intersects({e.position.xi(), e.position.yi(), e.hitbox.w, e.hitbox.h})) toDelete.push_back(i);  //alternative intersection method
         if(cutter.intersects(e.hitbox.x, e.hitbox.y)) toDelete.push_back(i);
     }
 
@@ -263,9 +305,14 @@ void Game::countHair(int& hairInside, int& hairOutside) {
     hairInside = 0;
     hairOutside = 0;
 
+    float razorScale = (map.getScale() / DEFAULT_SCALE);
     for(const Entity& e: map.getEntities()) {
         bool found = false;
-        for(const Rect& r: requests.at(0).hitboxes) {
+        for(const Rect& r2: requests.at(0).hitboxes) {
+
+            //calculate new hitboxPosition based on scale
+            Rect r{ (r2.x - 1080/2) * razorScale + window_width/2, r2.y * razorScale, r2.w * razorScale, r2.h * razorScale };
+
             if(r.intersects(e.hitbox.x, e.hitbox.y)) {
                 hairInside++;
                 found = true;
@@ -275,3 +322,4 @@ void Game::countHair(int& hairInside, int& hairOutside) {
         if(!found) hairOutside++;
     }
 }
+
