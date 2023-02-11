@@ -88,21 +88,24 @@ namespace texture {
 		textureImages.erase(sheetName);
 
 		bool deleteLast = false;
+		std::string toDelete;
 		for(std::map<std::string, std::string>::iterator iter = imageSheets.end(); iter != imageSheets.begin(); iter--) {
 			if(deleteLast) {
-				auto lastElement = iter;
-				lastElement++;
-				std::string toDelete = lastElement->first;
 				imageSheets.erase(toDelete);
 				imageRects.erase(toDelete);
-				lastElement--;
 			}
 
+			toDelete = iter->first;
 			if(iter->second == sheetName) {
 				deleteLast = true;
 			} else {
 				deleteLast = false;
 			}
+		}
+
+		if(deleteLast) {
+			imageSheets.erase(toDelete);
+			imageRects.erase(toDelete);
 		}
 	}
 
