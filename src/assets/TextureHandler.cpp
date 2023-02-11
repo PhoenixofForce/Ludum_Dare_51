@@ -84,15 +84,24 @@ namespace texture {
 	void deleteSheet(const std::string& sheetName) {
 		std::cout << "unloading " << sheetName << std::endl;
 
-		Texture2D t{ textureImages[sheetName] };
-		UnloadTexture(t);
+		UnloadTexture(textureImages[sheetName]);
 		textureImages.erase(sheetName);
 
+		bool deleteLast = false;
 		for(std::map<std::string, std::string>::iterator iter = imageSheets.end(); iter != imageSheets.begin(); iter--) {
-			if(iter->second == sheetName) {
-				std::string toDelete = iter->first;
-				imageRects.erase(toDelete);
+			if(deleteLast) {
+				auto lastElement = iter;
+				lastElement++;
+				std::string toDelete = lastElement->first;
 				imageSheets.erase(toDelete);
+				imageRects.erase(toDelete);
+				lastElement--;
+			}
+
+			if(iter->second == sheetName) {
+				deleteLast = true;
+			} else {
+				deleteLast = false;
 			}
 		}
 	}

@@ -55,6 +55,7 @@ int main(void)
     }
 #endif
 
+    texture::deleteAll();
     // De-Initialization
     //--------------------------------------------------------------------------------------
     CloseWindow();        // Close window and OpenGL context

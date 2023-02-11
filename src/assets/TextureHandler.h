@@ -7,7 +7,8 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include <fstream>
+#include <fstream>´
+#include <vector>
 
 #include "../util/structs/structs.h"
 
