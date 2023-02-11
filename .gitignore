@@ -1,0 +1,13 @@
+.vscode
+.vscode/*
+.vscode/**
+build/*.data
+build/*.exe
+build/*.html
+!build/shell.html
+build/*.js
+build/*.wasm
+lib/*
+lib/**
+include/*
+include/**
